@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>¿Es quincena?</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; background:#f6f8fa; }
+    .card { background:white; padding:24px 32px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.08); text-align:center; }
+    .result { font-size:4rem; font-weight:700; margin:8px 0; }
+    .info { color:#555; margin-top:8px; font-size:0.95rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div>¿Hoy es quincena?</div>
+    <div id="res" class="result">...</div>
+    <div id="info" class="info"></div>
+  </div>
+
+  <script>
+    // Devuelve true si la fecha 'd' corresponde a la quincena mid-month ajustada.
+    // Regla: la quincena es el día 15, pero si el 15 cae sábado o domingo,
+    // la quincena se anticipa al viernes anterior (14 si sábado, 13 si domingo).
+    function esQuincenaMidMonth(d) {
+      const y = d.getFullYear();
+      const m = d.getMonth();
+      const dia15 = new Date(y, m, 15);
+      const dow = dia15.getDay(); // 0 = domingo, 6 = sábado
+      let diaPago;
+      if (dow === 6) { // sábado -> pagar el viernes 14
+        diaPago = 14;
+      } else if (dow === 0) { // domingo -> pagar el viernes 13
+        diaPago = 13;
+      } else {
+        diaPago = 15;
+      }
+      return d.getDate() === diaPago;
+    }
+
+    // Obtener hoy en la zona local
+    const hoy = new Date();
+
+    // Calcular día de pago ajustado para mostrar info
+    function diaPagoAjustadoParaMes(d) {
+      const y = d.getFullYear();
+      const m = d.getMonth();
+      const dia15 = new Date(y, m, 15);
+      const dow = dia15.getDay();
+      if (dow === 6) return new Date(y, m, 14);
+      if (dow === 0) return new Date(y, m, 13);
+      return dia15;
+    }
+
+    const es = esQuincenaMidMonth(hoy);
+    const resEl = document.getElementById('res');
+    const infoEl = document.getElementById('info');
+
+    resEl.textContent = es ? 'SI' : 'NO';
+
+    const pago = diaPagoAjustadoParaMes(hoy);
+    const opciones = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+    infoEl.textContent = 'Día de pago (medio mes) este mes: ' + pago.toLocaleDateString(undefined, opciones);
+  </script>
+</body>
+</html>
